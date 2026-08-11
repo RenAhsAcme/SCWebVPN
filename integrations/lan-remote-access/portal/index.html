@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <title>远程接管</title>
+    <style>
+      :root {
+        font-family:
+          Inter,
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          BlinkMacSystemFont,
+          'Segoe UI',
+          sans-serif;
+        color: #18202b;
+        background: #eef2f6;
+        --panel: rgb(255 255 255 / 78%);
+        --line: rgb(37 50 67 / 13%);
+        --muted: #637083;
+        --accent: #315c8a;
+        --shadow: 0 24px 70px rgb(28 42 58 / 12%);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        min-height: 100vh;
+        margin: 0;
+        display: grid;
+        place-items: center;
+        padding: 36px 20px;
+        background:
+          radial-gradient(circle at 16% 14%, rgb(111 158 196 / 24%), transparent 34rem),
+          radial-gradient(circle at 88% 90%, rgb(121 141 184 / 16%), transparent 31rem), #eef2f6;
+      }
+
+      main {
+        width: min(880px, 100%);
+        padding: clamp(24px, 5vw, 52px);
+        border: 1px solid var(--line);
+        border-radius: 26px;
+        background: var(--panel);
+        box-shadow: var(--shadow);
+        backdrop-filter: blur(24px);
+      }
+
+      .eyebrow {
+        margin: 0 0 14px;
+        color: var(--accent);
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: clamp(34px, 6vw, 56px);
+        font-weight: 650;
+        letter-spacing: -0.045em;
+      }
+
+      .lead {
+        max-width: 620px;
+        margin: 18px 0 32px;
+        color: var(--muted);
+        font-size: 16px;
+        line-height: 1.75;
+      }
+
+      .modes {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 16px;
+      }
+
+      .mode {
+        display: flex;
+        min-height: 230px;
+        flex-direction: column;
+        padding: 24px;
+        color: inherit;
+        text-decoration: none;
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        background: rgb(255 255 255 / 43%);
+        transition:
+          transform 160ms ease,
+          border-color 160ms ease,
+          background 160ms ease;
+      }
+
+      .mode:hover,
+      .mode:focus-visible {
+        transform: translateY(-3px);
+        border-color: rgb(49 92 138 / 48%);
+        background: rgb(255 255 255 / 70%);
+        outline: none;
+      }
+
+      .mode h2 {
+        margin: 0 0 10px;
+        font-size: 23px;
+        font-weight: 650;
+        letter-spacing: -0.025em;
+      }
+
+      .mode p {
+        margin: 0;
+        color: var(--muted);
+        line-height: 1.65;
+      }
+
+      .tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 7px;
+        margin-top: 18px;
+      }
+
+      .tag {
+        padding: 5px 9px;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .action {
+        margin-top: auto;
+        padding-top: 24px;
+        color: var(--accent);
+        font-weight: 650;
+      }
+
+      .footnote {
+        margin: 22px 2px 0;
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.65;
+      }
+
+      .files {
+        display: inline-flex;
+        align-items: center;
+        min-height: 42px;
+        margin-top: 20px;
+        padding: 9px 14px;
+        color: var(--accent);
+        font-weight: 650;
+        text-decoration: none;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        background: rgb(255 255 255 / 30%);
+      }
+
+      .files:hover,
+      .files:focus-visible {
+        border-color: rgb(49 92 138 / 48%);
+        outline: none;
+      }
+
+      code {
+        color: inherit;
+        font: inherit;
+        font-weight: 650;
+      }
+
+      @media (max-width: 680px) {
+        .modes {
+          grid-template-columns: 1fr;
+        }
+        .mode {
+          min-height: 210px;
+        }
+      }
+
+      @media (prefers-color-scheme: dark) {
+        :root {
+          color: #e6edf5;
+          background: #0a1018;
+          --panel: rgb(14 21 31 / 82%);
+          --line: rgb(214 229 245 / 12%);
+          --muted: #9ba9ba;
+          --accent: #91bce5;
+          --shadow: 0 24px 80px rgb(0 0 0 / 38%);
+        }
+
+        body {
+          background:
+            radial-gradient(circle at 14% 13%, rgb(44 95 136 / 29%), transparent 34rem),
+            radial-gradient(circle at 86% 92%, rgb(55 65 109 / 25%), transparent 30rem), #0a1018;
+        }
+
+        .mode {
+          background: rgb(255 255 255 / 2.5%);
+        }
+        .mode:hover,
+        .mode:focus-visible {
+          background: rgb(255 255 255 / 5%);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <p class="eyebrow">WebVPN · P2P-only</p>
+      <h1>选择接管方式</h1>
+      <p class="lead">
+        两种链路都只通过浏览器与 OpenWrt Agent 的点对点连接。RDP
+        更适合办公与文件操作；视频接管会保留原机屏幕、会话和分辨率。
+      </p>
+
+      <div class="modes">
+        <a class="mode" href="/guacamole/">
+          <h2>RDP 接管</h2>
+          <p>
+            接管 Windows
+            用户会话。原机将进入锁屏，浏览器端可自适应分辨率，并使用远程声音与共享文件盘。
+          </p>
+          <div class="tags" aria-label="功能">
+            <span class="tag">低延迟</span>
+            <span class="tag">声音</span>
+            <span class="tag">文件盘</span>
+          </div>
+          <span class="action">进入 RDP →</span>
+        </a>
+
+        <a class="mode" href="/web/?id=__RUSTDESK_ID__">
+          <h2>视频接管</h2>
+          <p>直接控制物理桌面，保持原机会话与当前分辨率；适合需要看见本机真实画面的场景。</p>
+          <div class="tags" aria-label="功能">
+            <span class="tag">原机会话</span>
+            <span class="tag">声音</span>
+            <span class="tag">浏览器控制</span>
+          </div>
+          <span class="action">进入视频接管 →</span>
+        </a>
+      </div>
+
+      <a class="files" href="/files/">打开高速文件传输 →</a>
+
+      <p class="footnote">
+        视频接管的本机 ID：<code id="rustdesk-id">__RUSTDESK_ID__</code
+        >。固定密码不会显示在此页面，请保存在密码管理器中。
+      </p>
+    </main>
+  </body>
+</html>

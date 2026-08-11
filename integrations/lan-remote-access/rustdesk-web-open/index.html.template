@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="description" content="SCWebVPN Remote 视频接管" />
+    <title>SCWebVPN Remote · 视频接管</title>
+    <link rel="stylesheet" href="js/dist/index.css?v=09047325936aa6a0" />
+    <script src="ogvjs-1.8.6/ogv.js?v=09047325936aa6a0"></script>
+    <script src="yuv-canvas-1.2.6.js?v=09047325936aa6a0"></script>
+  </head>
+  <body>
+    <main id="app" data-peer-id="" data-server-key="__RUSTDESK_KEY__">
+      <p class="boot">正在载入视频接管…</p>
+    </main>
+    <script type="module" src="js/dist/index.js?v=09047325936aa6a0"></script>
+  </body>
+</html>

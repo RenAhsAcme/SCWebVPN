@@ -1,0 +1,20 @@
+{
+  "hosts": ["unix:///var/run/lan-remote/docker.sock"],
+  "pidfile": "/var/run/lan-remote/dockerd.pid",
+  "data-root": "/opt/lan-remote-access/docker",
+  "exec-root": "/var/run/lan-remote/exec",
+  "bridge": "none",
+  "iptables": false,
+  "ip6tables": false,
+  "ip-forward": false,
+  "ip-masq": false,
+  "userland-proxy": false,
+  "storage-driver": "overlay2",
+  "no-new-privileges": true,
+  "live-restore": true,
+  "log-driver": "local",
+  "log-opts": {
+    "max-size": "10m",
+    "max-file": "3"
+  }
+}

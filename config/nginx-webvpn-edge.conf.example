@@ -1,0 +1,9 @@
+# Dedicated origin certificate. The wildcard must cover auth.vpn.example.com
+# and every persistent or temporary service below vpn.example.com.
+ssl_certificate /etc/letsencrypt/live/scwebvpn-origin/fullchain.pem;
+ssl_certificate_key /etc/letsencrypt/live/scwebvpn-origin/privkey.pem;
+
+# Configure the CDN/origin-access client CA used by your deployment. Keeping
+# verification enabled rejects direct-origin TLS clients before WebVPN routing.
+ssl_client_certificate /etc/nginx/ssl/cdn-origin-ca.pem;
+ssl_verify_client on;

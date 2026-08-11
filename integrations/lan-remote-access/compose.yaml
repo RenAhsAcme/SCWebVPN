@@ -1,0 +1,105 @@
+name: lan-remote-access
+
+x-restricted-service: &restricted-service
+  network_mode: host
+  restart: unless-stopped
+  security_opt:
+    - no-new-privileges:true
+  cap_drop:
+    - ALL
+
+services:
+  postgres:
+    image: postgres:18.4-alpine3.24
+    network_mode: host
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: guacamole_db
+      POSTGRES_USER: guacamole
+      POSTGRES_PASSWORD_FILE: /run/secrets/guacamole_db_password
+      PGDATA: /var/lib/postgresql/18/docker
+    command:
+      - postgres
+      - -c
+      - listen_addresses=127.0.0.1
+      - -c
+      - port=55432
+      - -c
+      - password_encryption=scram-sha-256
+    secrets:
+      - guacamole_db_password
+    volumes:
+      - ./data/postgres:/var/lib/postgresql
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -h 127.0.0.1 -p 55432 -U guacamole -d guacamole_db']
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
+  guacd:
+    <<: *restricted-service
+    image: guacamole/guacd:1.6.0
+    entrypoint: ['/opt/guacamole/sbin/guacd']
+    command: ['-b', '127.0.0.1', '-l', '54822', '-p', '/tmp/guacd.pid', '-f', '-L', 'info']
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=32m
+      - /home/guacd:rw,noexec,nosuid,size=16m,uid=1000,gid=1000,mode=700
+    volumes:
+      - ./data/guacamole-drive:/drive
+    healthcheck:
+      test: ['CMD-SHELL', 'test -w /home/guacd && nc -z 127.0.0.1 54822 || exit 1']
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+
+  guacamole:
+    <<: *restricted-service
+    image: guacamole/guacamole:1.6.0
+    depends_on:
+      postgres:
+        condition: service_healthy
+      guacd:
+        condition: service_healthy
+    environment:
+      GUACD_HOSTNAME: 127.0.0.1
+      GUACD_PORT: '54822'
+      POSTGRESQL_ENABLED: 'true'
+      POSTGRESQL_HOSTNAME: 127.0.0.1
+      POSTGRESQL_PORT: '55432'
+      POSTGRESQL_DATABASE: guacamole_db
+      POSTGRESQL_USERNAME: guacamole
+      POSTGRESQL_PASSWORD_FILE: /run/secrets/guacamole_db_password
+      POSTGRESQL_SSL_MODE: disable
+      HTTP_AUTH_ENABLED: 'true'
+      HTTP_AUTH_HEADER: X-WebVPN-User
+      REMOTE_IP_VALVE_ENABLED: 'true'
+      PROXY_ALLOWED_IPS_REGEX: 127\\.0\\.0\\.1
+      WEBAPP_CONTEXT: guacamole
+    secrets:
+      - guacamole_db_password
+    volumes:
+      - ./runtime/tomcat-server.xml:/usr/local/tomcat/conf/server.xml:ro
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=128m
+      - /usr/local/tomcat/temp:rw,noexec,nosuid,size=32m
+      - /usr/local/tomcat/work:rw,noexec,nosuid,size=32m
+
+  hbbs:
+    <<: *restricted-service
+    image: rustdesk/rustdesk-server:1.1.15@sha256:696eeb859a7191e95eca697e5fbfffaaffa47dc4f8b339dad1a35312b7b6972e
+    command: ['hbbs']
+    volumes:
+      - ./data/rustdesk:/root
+
+  hbbr:
+    <<: *restricted-service
+    image: rustdesk/rustdesk-server:1.1.15@sha256:696eeb859a7191e95eca697e5fbfffaaffa47dc4f8b339dad1a35312b7b6972e
+    command: ['hbbr']
+    volumes:
+      - ./data/rustdesk:/root
+
+secrets:
+  guacamole_db_password:
+    file: ./secrets/guacamole-db-password

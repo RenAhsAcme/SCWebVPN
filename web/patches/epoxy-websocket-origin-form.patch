@@ -1,0 +1,45 @@
+diff --git a/client/src/websocket.rs b/client/src/websocket.rs
+--- a/client/src/websocket.rs
++++ b/client/src/websocket.rs
+@@ -55,12 +55,17 @@ impl EpoxyWebSocket {
+ 		let onerror_cloned = onerror.clone();
+ 		let ret: Result<EpoxyWebSocket, EpoxyError> = async move {
+ 			let url: Uri = url.try_into()?;
+-			let host = url.host().ok_or(EpoxyError::NoUrlHost)?;
++			let authority = url
++				.authority()
++				.ok_or(EpoxyError::NoUrlHost)?
++				.as_str()
++				.to_string();
++			let request_uri = url.path_and_query().map_or("/", |value| value.as_str());
+ 
+ 			let mut req = Request::builder()
+ 				.method(Method::GET)
+-				.uri(url.clone())
+-				.header(HOST, host)
++				.uri(request_uri)
++				.header(HOST, authority)
+ 				.header(CONNECTION, "Upgrade")
+ 				.header(UPGRADE, "websocket")
+ 				.header(SEC_WEBSOCKET_KEY, ws_key())
+@@ -85,7 +90,7 @@ impl EpoxyWebSocket {
+ 
+ 			let req = req.body(Empty::new())?;
+ 
+-			let mut response = request(req, client).await?;
++			let mut response = request(req, client, url).await?;
+ 			verify(&response)?;
+ 
+ 			let websocket = WebSocket::after_handshake(
+@@ -221,9 +226,10 @@ impl EpoxyWebSocket {
+ async fn request(
+ 	req: Request<Empty<Bytes>>,
+ 	client: &EpoxyClient,
++	remote: Uri,
+ ) -> Result<Response<Incoming>, EpoxyError> {
+ 	let stream = StreamProviderService(client.stream_provider.clone())
+-		.connect(req.uri().clone())
++		.connect(remote)
+ 		.await?;
+ 
+ 	let (mut sender, conn) = http1::Builder::new()

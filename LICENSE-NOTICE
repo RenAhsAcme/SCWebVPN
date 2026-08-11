@@ -1,0 +1,7 @@
+SPDX-License-Identifier: AGPL-3.0-only
+
+Project-owned source code in this repository is licensed under the GNU Affero
+General Public License, version 3 only. The canonical terms are in `LICENSE`.
+
+Third-party components retain their own copyright notices and licenses as
+documented in `LICENSE_COMPLIANCE.md` and their source/runtime directories.

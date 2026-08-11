@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <title>WebVPN</title>
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <main>
+      <header>
+        <div>
+          <p class="eyebrow">P2P-only · STUN discovery</p>
+          <h1>WebVPN</h1>
+          <p class="lede">浏览器与家庭网关直接传输；控制面不承载网页、文件或远程桌面数据。</p>
+        </div>
+        <button id="logout" class="quiet" type="button">退出</button>
+      </header>
+
+      <section id="agent-binding" class="panel" aria-labelledby="agent-binding-title">
+        <div class="section-heading">
+          <div>
+            <h2 id="agent-binding-title">绑定 OpenWrt Agent</h2>
+            <p>首次设置时生成一次性绑定码，并在 OpenWrt 的交互提示中粘贴。</p>
+          </div>
+          <button id="binding-create" class="quiet" type="button">生成一次性绑定码</button>
+        </div>
+        <div id="binding-result" class="binding-result" hidden>
+          <output id="binding-code" class="binding-code" aria-live="polite"></output>
+          <span id="binding-expiry" class="binding-expiry"></span>
+        </div>
+        <p class="boundary">绑定码只在本页内存中短暂显示，不写入 URL、浏览器存储或日志。</p>
+      </section>
+
+      <section class="panel" aria-labelledby="services-title">
+        <div class="section-heading">
+          <div>
+            <h2 id="services-title">服务</h2>
+            <p>选择由 OpenWrt Agent 明确授权的内网服务。</p>
+          </div>
+          <div class="actions">
+            <button id="restart" class="quiet" type="button" disabled>重建 P2P</button>
+            <button id="disconnect" class="quiet" type="button" disabled>断开</button>
+          </div>
+        </div>
+        <div id="services" class="services" aria-live="polite">正在读取服务目录…</div>
+      </section>
+
+      <section id="temporary-create" class="panel" aria-labelledby="temporary-create-title">
+        <h2 id="temporary-create-title">临时入口</h2>
+        <p class="boundary">
+          创建隔离的随机子域名；真实内网目标不会发送给 Controller，也不会写入 URL。
+        </p>
+        <div class="diagnostic-form">
+          <select id="temporary-agent" aria-label="OpenWrt Agent"></select>
+          <select id="temporary-kind" aria-label="服务协议">
+            <option value="https">HTTPS</option>
+            <option value="http">HTTP</option>
+          </select>
+          <button id="temporary-create-button" class="quiet" type="button" disabled>
+            创建临时入口
+          </button>
+        </div>
+      </section>
+
+      <section id="temporary-target" class="panel" aria-labelledby="temporary-target-title" hidden>
+        <h2 id="temporary-target-title">连接临时目标</h2>
+        <p class="boundary">
+          目标仅保留在此页面内存，并经已认证的 P2P 控制通道交给 OpenWrt Agent 校验。
+        </p>
+        <div class="diagnostic-form">
+          <input
+            id="temporary-url"
+            type="url"
+            placeholder="https://internal.example:443/path"
+            autocomplete="off"
+            spellcheck="false"
+          />
+          <button id="temporary-connect" class="quiet" type="button">建立 P2P</button>
+        </div>
+      </section>
+
+      <section class="panel connection" aria-labelledby="connection-title">
+        <h2 id="connection-title">连接状态</h2>
+        <output id="status" class="status" aria-live="polite">正在检查浏览器与 Agent…</output>
+        <dl id="details"></dl>
+        <p class="boundary">
+          仅允许 host、srflx 与 prflx candidate；不支持 TURN、relay 或服务器业务中继。
+        </p>
+      </section>
+
+      <section class="panel" aria-labelledby="diagnostic-title">
+        <h2 id="diagnostic-title">内网诊断</h2>
+        <p class="boundary">查询只通过当前 P2P 会话；DNS 结果仍受 Agent allowlist 约束。</p>
+        <div class="diagnostic-form">
+          <input
+            id="dns-name"
+            type="text"
+            placeholder="内网主机名"
+            autocomplete="off"
+            spellcheck="false"
+          />
+          <button id="dns-query" class="quiet" type="button" disabled>DNS 查询</button>
+          <button id="ping-target" class="quiet" type="button" disabled>Ping 当前服务</button>
+        </div>
+        <output id="diagnostic-result" class="status" aria-live="polite">建立 P2P 后可用。</output>
+      </section>
+
+      <iframe id="remote" title="内网服务" allow="clipboard-read; clipboard-write" hidden></iframe>
+      <footer><a href="/source/">源代码与许可证</a></footer>
+    </main>
+    <script src="/compat/scramjet/scramjet.js"></script>
+    <script src="/compat/controller/controller.api.js"></script>
+    <script type="module" src="/app.js"></script>
+  </body>
+</html>

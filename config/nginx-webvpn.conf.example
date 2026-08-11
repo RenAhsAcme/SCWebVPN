@@ -1,0 +1,159 @@
+# Production template. Verify CDN proxy ranges, real-IP handling and certificate
+# paths immediately before deployment; do not copy historical addresses.
+
+limit_req_zone $binary_remote_addr zone=webvpn_auth:10m rate=5r/m;
+limit_req_zone $binary_remote_addr zone=webvpn_api:10m rate=10r/s;
+
+upstream webvpn_controller {
+    server 127.0.0.1:8789;
+    keepalive 8;
+}
+
+upstream webvpn_authelia {
+    server 127.0.0.1:9091;
+    keepalive 4;
+}
+
+server {
+    listen 443 ssl http2;
+    listen [::]:443 ssl http2;
+    server_name auth.vpn.example.com;
+
+    include /etc/nginx/snippets/scwebvpn-edge.conf;
+
+    client_max_body_size 256k;
+
+    location / {
+        limit_req zone=webvpn_auth burst=10 nodelay;
+        proxy_http_version 1.1;
+        proxy_pass http://webvpn_authelia;
+        proxy_set_header Host $http_host;
+        proxy_set_header X-Original-URL $scheme://$http_host$request_uri;
+        proxy_set_header X-Forwarded-Method $request_method;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-Host $http_host;
+        proxy_set_header X-Forwarded-URI $request_uri;
+        proxy_set_header X-Forwarded-For $remote_addr;
+        proxy_set_header Connection "";
+    }
+}
+
+server {
+    listen 443 ssl http2;
+    listen [::]:443 ssl http2;
+    server_name vpn.example.com *.vpn.example.com;
+
+    include /etc/nginx/snippets/scwebvpn-edge.conf;
+
+    client_max_body_size 1m;
+
+    location = /internal/authelia/authz {
+        internal;
+        proxy_http_version 1.1;
+        proxy_pass http://webvpn_authelia/api/authz/auth-request;
+        proxy_pass_request_body off;
+        proxy_set_header Content-Length "";
+        proxy_set_header Host auth.vpn.example.com;
+        proxy_set_header X-Original-Method $request_method;
+        proxy_set_header X-Original-URL $scheme://$http_host$request_uri;
+        proxy_set_header X-Forwarded-Method $request_method;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-Host $http_host;
+        proxy_set_header X-Forwarded-URI $request_uri;
+        proxy_set_header X-Forwarded-For $remote_addr;
+        proxy_set_header Connection "";
+    }
+
+    # Agent bootstrap and signed signaling are intentionally outside Authelia.
+    # Controller binding codes, Ed25519 signatures and one-time nonces authorize
+    # them; these locations never accept or emit business traffic.
+    location = /api/v1/agents/bind {
+        limit_req zone=webvpn_api burst=10 nodelay;
+        proxy_http_version 1.1;
+        proxy_pass http://webvpn_controller;
+        proxy_set_header Host $http_host;
+        proxy_set_header Authorization "";
+        proxy_set_header Remote-User "";
+        proxy_set_header X-WebVPN-User "";
+        proxy_set_header X-WebVPN-Session "";
+        proxy_set_header X-WebVPN-Internal-Auth "";
+        proxy_set_header Connection "";
+    }
+
+    location = /api/v1/agent/challenges {
+        limit_req zone=webvpn_api burst=20 nodelay;
+        proxy_http_version 1.1;
+        proxy_pass http://webvpn_controller;
+        proxy_set_header Host $http_host;
+        proxy_set_header Authorization "";
+        proxy_set_header Remote-User "";
+        proxy_set_header X-WebVPN-User "";
+        proxy_set_header X-WebVPN-Session "";
+        proxy_set_header X-WebVPN-Internal-Auth "";
+        proxy_set_header Connection "";
+    }
+
+    location ^~ /api/v1/agent/ {
+        limit_req zone=webvpn_api burst=60 nodelay;
+        proxy_http_version 1.1;
+        proxy_pass http://webvpn_controller;
+        proxy_set_header Host $http_host;
+        proxy_set_header Authorization "";
+        proxy_set_header Remote-User "";
+        proxy_set_header X-WebVPN-User "";
+        proxy_set_header X-WebVPN-Session "";
+        proxy_set_header X-WebVPN-Internal-Auth "";
+        proxy_set_header Connection "";
+        proxy_buffering off;
+        proxy_read_timeout 35s;
+    }
+
+    location ^~ /api/v1/browser/ {
+        auth_request /internal/authelia/authz;
+        auth_request_set $webvpn_user $upstream_http_remote_user;
+        auth_request_set $webvpn_redirection $upstream_http_location;
+        error_page 401 =302 $webvpn_redirection;
+
+        limit_req zone=webvpn_api burst=60 nodelay;
+        proxy_http_version 1.1;
+        proxy_pass http://webvpn_controller;
+        proxy_set_header Host $http_host;
+
+        # Discard every client-controlled identity header, then set the two
+        # Controller headers from trusted local state.
+        proxy_set_header Authorization "";
+        proxy_set_header Remote-User "";
+        proxy_set_header Remote-Groups "";
+        proxy_set_header Remote-Email "";
+        proxy_set_header X-WebVPN-User $webvpn_user;
+        proxy_set_header X-WebVPN-Session $cookie_webvpn_session;
+        include /etc/nginx/snippets/webvpn-internal-auth-header.conf;
+
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-Host $http_host;
+        proxy_set_header X-Forwarded-For $remote_addr;
+        proxy_set_header Connection "";
+        proxy_buffering off;
+    }
+
+    location = /auth/logout {
+        auth_request /internal/authelia/authz;
+        return 302 https://auth.vpn.example.com/logout?rd=https://vpn.example.com/;
+    }
+
+    location / {
+        auth_request /internal/authelia/authz;
+        auth_request_set $webvpn_redirection $upstream_http_location;
+        error_page 401 =302 $webvpn_redirection;
+
+        root /opt/scwebvpn/current/web;
+        try_files $uri /index.html;
+
+        add_header Cache-Control "no-store" always;
+        add_header Content-Security-Policy "default-src 'self'; base-uri 'none'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; script-src 'self' 'unsafe-eval' 'wasm-unsafe-eval'; style-src 'self'; img-src 'self' data: blob:; connect-src 'self'; worker-src 'self' blob:; frame-src 'self' blob:" always;
+        add_header Referrer-Policy "no-referrer" always;
+        add_header X-Content-Type-Options "nosniff" always;
+        add_header X-Frame-Options "DENY" always;
+        add_header Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=(), usb=()" always;
+    }
+}

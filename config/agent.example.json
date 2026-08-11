@@ -1,0 +1,33 @@
+{
+  "controller_url": "https://vpn.example.com",
+  "agent_id": "REPLACE_AFTER_BINDING",
+  "private_key_file": "/etc/scwebvpn/identity/agent.key",
+  "stun_urls": ["stun:stun.cloudflare.com:3478", "stun:stun.l.google.com:19302"],
+  "temporary": {
+    "allowed_cidrs": ["192.168.1.0/24", "192.168.3.0/24"],
+    "allowed_ports": [80, 443, 8080],
+    "ca_files": ["/etc/scwebvpn/ca/home.pem"]
+  },
+  "services": [
+    {
+      "id": "AQIDBAUGBwgJCgsMDQ4PEA",
+      "policy_ref": "openwrt-luci",
+      "kind": "https",
+      "target_host": "192.168.1.1",
+      "target_port": 443,
+      "allowed_cidrs": ["192.168.1.1/32"],
+      "tls": {
+        "server_name": "openwrt.lan",
+        "ca_files": ["/etc/scwebvpn/ca/openwrt.pem"]
+      }
+    },
+    {
+      "id": "ISIjJCUmJygpKissLS4vMA",
+      "policy_ref": "guacamole-local",
+      "kind": "guacamole",
+      "target_host": "127.0.0.1",
+      "target_port": 8080,
+      "allowed_cidrs": ["127.0.0.1/32"]
+    }
+  ]
+}

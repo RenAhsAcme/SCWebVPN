@@ -1,0 +1,10 @@
+repository=https://github.com/MercuryWorkshop/scramjet.git
+commit=c26bfc6d7f7c7f4dac52ce182a2ceab90e851823
+scramjet_tag=v2.0.67-alpha.2
+scramjet_package=@mercuryworkshop/scramjet@2.0.67-alpha.2
+scramjet_integrity=sha512-E/vmwQTqIoYmPLDb76t8Nv7O9kUdv8C6mRejdsT8APk5vBUYyIMI6CO0gyUVRX77Fc/NyoopfZNSaJ4qufJEww==
+controller_tag=v0.0.14-controller
+controller_package=@mercuryworkshop/scramjet-controller@0.0.14
+controller_integrity=sha512-0Sfn0xcUM69h6pIaPmntwFYcAOLyNzGPE6AQSMwrakYUFhJNLbEYWMa4actp6w3jVnwpQ9suggOO1bKrX5zioA==
+license_expression=AGPL-3.0-only
+submodules=none

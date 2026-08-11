@@ -1,0 +1,10 @@
+users:
+  owner:
+    disabled: false
+    displayname: Owner
+    # Generate interactively with the pinned Authelia binary. Never reuse this
+    # placeholder and never commit the resulting users_database.yml.
+    password: '$argon2id$REPLACE_WITH_INTERACTIVE_HASH'
+    email: owner@localhost
+    groups:
+      - webvpn

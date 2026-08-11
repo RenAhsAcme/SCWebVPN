@@ -1,0 +1,20 @@
+{
+  "name": "scwebvpn-browser",
+  "version": "0.1.0",
+  "private": true,
+  "license": "AGPL-3.0-only",
+  "type": "module",
+  "scripts": {
+    "build": "bun run scripts/build.ts",
+    "check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@mercuryworkshop/epoxy-tls": "2.1.19-1",
+    "@mercuryworkshop/proxy-transports": "1.0.2",
+    "@mercuryworkshop/scramjet": "2.0.67-alpha.2",
+    "@mercuryworkshop/scramjet-controller": "0.0.14"
+  },
+  "devDependencies": {
+    "typescript": "5.9.3"
+  }
+}

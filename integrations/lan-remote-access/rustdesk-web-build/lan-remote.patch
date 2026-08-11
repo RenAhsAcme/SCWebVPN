@@ -1,0 +1,229 @@
+diff --git a/flutter/web/v1/js/tsconfig.json b/flutter/web/v1/js/tsconfig.json
+--- a/flutter/web/v1/js/tsconfig.json
++++ b/flutter/web/v1/js/tsconfig.json
+@@ -8,6 +8,7 @@
+       "DOM"
+     ],
+     "moduleResolution": "Node",
++    "types": [],
+     "strict": true,
+     "sourceMap": true,
+     "resolveJsonModule": true,
+diff --git a/flutter/web/v1/js/src/codec.js b/flutter/web/v1/js/src/codec.js
+index 27c9565e..4d0c28eb 100644
+--- a/flutter/web/v1/js/src/codec.js
++++ b/flutter/web/v1/js/src/codec.js
+@@ -19,17 +19,13 @@
+   OGVDecoderVideoAV1MTW: 'ogv-decoder-video-av1-mt-wasm.js',
+   OGVDecoderVideoAV1SIMDMTW: 'ogv-decoder-video-av1-simd-mt-wasm.js',
+ */
+-import { simd } from "wasm-feature-detect";
+-
+ export async function loadVp9(callback) {
+   // Multithreading is used only if `options.threading` is true.
+   // This requires browser support for the new `SharedArrayBuffer` and `Atomics` APIs,
+   // currently available in Firefox and Chrome with experimental flags enabled.
+   // 所有主流浏览器均默认于2018年1月5日禁用SharedArrayBuffer
+-  const isSIMD = await simd();
+-  console.log('isSIMD: ' + isSIMD);
+   window.OGVLoader.loadClass(
+-    isSIMD ? "OGVDecoderVideoVP9SIMDW" : "OGVDecoderVideoVP9W",
++    "OGVDecoderVideoVP9W",
+     (videoCodecClass) => {
+       window.videoCodecClass = videoCodecClass;
+       videoCodecClass({ videoFormat: {} }).then((decoder) => {
+diff --git a/flutter/web/v1/js/src/connection.ts b/flutter/web/v1/js/src/connection.ts
+index b0c479c9..72bc62cf 100644
+--- a/flutter/web/v1/js/src/connection.ts
++++ b/flutter/web/v1/js/src/connection.ts
+@@ -6,14 +6,7 @@ import * as sha256 from "fast-sha256";
+ import * as globals from "./globals";
+ import { decompress, mapKey, sleep } from "./common";
+ 
+-const PORT = 21116;
+-const HOSTS = [
+-  "rs-sg.rustdesk.com",
+-  "rs-cn.rustdesk.com",
+-  "rs-us.rustdesk.com",
+-];
+-let HOST = localStorage.getItem("rendezvous-server") || HOSTS[0];
+-const SCHEMA = "ws://";
++const HOST = localStorage.getItem("custom-rendezvous-server") || window.location.hostname;
+ 
+ type MsgboxCallback = (type: string, title: string, text: string) => void;
+ type DrawCallback = (data: Uint8Array) => void;
+@@ -379,6 +372,11 @@ export default class Connection {
+   getOptionMessage(): message.OptionMessage | undefined {
+     let n = 0;
+     const msg = message.OptionMessage.fromPartial({});
++    msg.supported_decoding = message.SupportedDecoding.fromPartial({
++      ability_vp9: 1,
++      prefer: message.SupportedDecoding_PreferCodec.VP9,
++    });
++    n += 1;
+     const q = this.getImageQualityEnum(this.getImageQuality(), true);
+     const yes = message.OptionMessage_BoolOption.Yes;
+     if (q != undefined) {
+@@ -725,40 +718,19 @@ export default class Connection {
+   }
+ }
+ 
+-function testDelay() {
+-  var nearest = "";
+-  HOSTS.forEach((host) => {
+-    const now = new Date().getTime();
+-    new Websock(getrUriFromRs(host), true).open().then(() => {
+-      console.log("latency of " + host + ": " + (new Date().getTime() - now));
+-      if (!nearest) {
+-        HOST = host;
+-        localStorage.setItem("rendezvous-server", host);
+-      }
+-    });
+-  });
+-}
+-
+-testDelay();
+-
+ function getDefaultUri(isRelay: Boolean = false): string {
+   const host = localStorage.getItem("custom-rendezvous-server");
+   return getrUriFromRs(host || HOST, isRelay);
+ }
+ 
+ function getrUriFromRs(
+-  uri: string,
++  _uri: string,
+   isRelay: Boolean = false,
+-  roffset: number = 0
++  _roffset: number = 0
+ ): string {
+-  if (uri.indexOf(":") > 0) {
+-    const tmp = uri.split(":");
+-    const port = parseInt(tmp[1]);
+-    uri = tmp[0] + ":" + (port + (isRelay ? roffset || 3 : 2));
+-  } else {
+-    uri += ":" + (PORT + (isRelay ? 3 : 2));
+-  }
+-  return SCHEMA + uri;
++  const schema = window.location.protocol === "https:" ? "wss:" : "ws:";
++  const path = isRelay ? "/ws/relay" : "/ws/id";
++  return `${schema}//${window.location.host}${path}`;
+ }
+ 
+ function hash(datas: (string | Uint8Array)[]): Uint8Array {
+diff --git a/flutter/web/v1/js/src/globals.js b/flutter/web/v1/js/src/globals.js
+index 953add18..e240e11a 100644
+--- a/flutter/web/v1/js/src/globals.js
++++ b/flutter/web/v1/js/src/globals.js
+@@ -74,7 +74,7 @@ export function draw(frame) {
+     for (let i = 0; i < size; i += row) {
+       flipPixels.set(pixels.subarray(i, i + row), end - i);
+     }
+-    onRgba(flipPixels);
++    onRgba(0, flipPixels);
+     testSpeed[1] += new Date().getTime() - tm0;
+     testSpeed[0] += 1;
+     if (testSpeed[0] > 30) {
+@@ -179,6 +179,13 @@ export function decrypt(signed, nonce, key) {
+ 
+ window.setByName = (name, value) => {
+   switch (name) {
++    case 'session_add_sync':
++      return '';
++    case 'session_start':
++      value = JSON.parse(value);
++      newConn();
++      startConn(value.id);
++      break;
+     case 'remote_id':
+       localStorage.setItem('remote-id', value);
+       break;
+@@ -191,6 +198,7 @@ window.setByName = (name, value) => {
+       curConn.setRemember(value.remember == 'true');
+       curConn.login(value.password);
+       break;
++    case 'session_close':
+     case 'close':
+       close();
+       break;
+@@ -200,6 +208,7 @@ window.setByName = (name, value) => {
+     case 'reconnect':
+       curConn.reconnect();
+       break;
++    case 'option:toggle':
+     case 'toggle_option':
+       curConn.toggleOption(value);
+       break;
+@@ -220,6 +229,7 @@ window.setByName = (name, value) => {
+       delete peers[value];
+       localStorage.setItem('peers', JSON.stringify(peers));
+       break;
++    case 'flutter_key_event':
+     case 'input_key':
+       value = JSON.parse(value);
+       curConn.inputKey(value.name, value.down == 'true', value.press == 'true', value.alt == 'true', value.ctrl == 'true', value.shift == 'true', value.command == 'true');
+@@ -253,13 +263,28 @@ window.setByName = (name, value) => {
+       }
+       curConn.inputMouse(mask, parseInt(value.x || '0'), parseInt(value.y || '0'), value.alt == 'true', value.ctrl == 'true', value.shift == 'true', value.command == 'true');
+       break;
++    case 'option:flutter:local':
++    case 'option:local':
++      value = JSON.parse(value);
++      localStorage.setItem(value.name, value.value);
++      break;
+     case 'option':
+       value = JSON.parse(value);
++      if (value.name === 'key') break;
++      if ([
++        'rendezvous-server',
++        'custom-rendezvous-server',
++      ].includes(value.name)) {
++        value.value = window.location.hostname;
++      }
+       localStorage.setItem(value.name, value.value);
+       break;
++    case 'option:session':
++    case 'option:flutter:peer':
++    case 'option:peer':
+     case 'peer_option':
+       value = JSON.parse(value);
+-      curConn.setOption(value.name, value.value);
++      window.curConn?.setOption(value.name, value.value);
+       break;
+     case 'input_os_password':
+       curConn.inputOsPassword(value);
+@@ -290,6 +315,19 @@ function getPeersForDart() {
+ 
+ function _getByName(name, arg) {
+   switch (name) {
++    case 'get_conn_status':
++      return { status_num: 1 };
++    case 'is_using_public_server':
++      return false;
++    case 'option:toggle':
++      return window.curConn?.getOption(arg) || false;
++    case 'option:session':
++    case 'option:flutter:peer':
++    case 'option:peer':
++      return window.curConn?.getOption(arg) || '';
++    case 'option:flutter:local':
++    case 'option:local':
++      return localStorage.getItem(arg);
+     case 'peers':
+       return getPeersForDart();
+     case 'remote_id':
+@@ -330,7 +368,7 @@ export function playAudio(packet) {
+ window.init = async () => {
+   if (yuvWorker) {
+     yuvWorker.onmessage = (e) => {
+-      onRgba(e.data);
++      onRgba(0, e.data);
+     }
+   }
+   opusWorker.onmessage = (e) => {
+@@ -380,4 +418,4 @@ export function copyToClipboard(text) {
+       document.body.removeChild(textarea);
+     }
+   }
+-}
+\ No newline at end of file
++}

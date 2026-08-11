@@ -1,0 +1,46 @@
+[Unit]
+Description=SCWebVPN P2P-only Controller
+After=local-fs.target
+Before=nginx.service
+
+[Service]
+Type=simple
+User=webvpn
+Group=webvpn
+ExecStart=/opt/scwebvpn/current/webvpn-controller -config /etc/scwebvpn/controller.json
+Restart=on-failure
+RestartSec=3s
+TimeoutStopSec=15s
+
+StateDirectory=scwebvpn
+StateDirectoryMode=0750
+UMask=0027
+NoNewPrivileges=yes
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectSystem=strict
+ProtectHome=yes
+ProtectControlGroups=yes
+ProtectKernelLogs=yes
+ProtectKernelModules=yes
+ProtectKernelTunables=yes
+ProtectClock=yes
+ProtectHostname=yes
+ProtectProc=invisible
+ProcSubset=pid
+RestrictSUIDSGID=yes
+RestrictRealtime=yes
+LockPersonality=yes
+MemoryDenyWriteExecute=yes
+RemoveIPC=yes
+CapabilityBoundingSet=
+AmbientCapabilities=
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+IPAddressDeny=any
+IPAddressAllow=localhost
+SystemCallArchitectures=native
+SystemCallFilter=@system-service
+SystemCallErrorNumber=EPERM
+
+[Install]
+WantedBy=multi-user.target

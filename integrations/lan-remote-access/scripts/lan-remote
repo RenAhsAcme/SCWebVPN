@@ -1,0 +1,9 @@
+#!/bin/sh
+
+set -eu
+
+export DOCKER_HOST=unix:///var/run/lan-remote/docker.sock
+export DOCKER_CONFIG=/opt/lan-remote-access/docker-cli
+
+cd /opt/lan-remote-access
+exec /opt/lan-remote-access/bin/docker compose "$@"

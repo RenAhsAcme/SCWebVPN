@@ -1,0 +1,18 @@
+# Install once at the http{} scope only after confirming no existing default
+# listener owns these sockets. This form is compatible with the production
+# Nginx 1.18 baseline; ssl_reject_handshake is unavailable there.
+server {
+    listen 80 default_server;
+    listen [::]:80 default_server;
+    server_name _;
+    return 444;
+}
+
+server {
+    listen 443 ssl default_server;
+    listen [::]:443 ssl default_server;
+    server_name _;
+
+    include /etc/nginx/snippets/scwebvpn-edge.conf;
+    return 444;
+}
