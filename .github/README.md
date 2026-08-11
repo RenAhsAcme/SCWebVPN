@@ -1,7 +1,82 @@
-# Personal_Template
-该仓库是个人仓库的模板，用于在大多数情况下快速生成所有必要文件。这是用于在 GitHub 仓库首页显示的 README 文件，应当尽可能详细。
+# SCWebVPN
 
-<details>
-      <summary>English Ver.</summary>
-This repository is a template for a personal repository, used to quickly generate all the necessary files in most cases. This is the README file used to display on the GitHub repository homepage, and it should be as detailed as possible.
-</details>
+简体中文 | [English](README.en.md)
+
+随时随地利用 Web 浏览器快速穿透内网。
+
+## 功能简介
+
+SCWebVPN 来源于我在大学生活的需要。有时去上机房的实践课程，机房的电脑往往都带有还原保护，机房电脑的工具习惯显然不能满足我的需要。另外，有时我在内网部署了一些服务，想要远程访问它们。现场安装远程控制软件不够方便，因此萌生出做一个 WebVPN 用于零安装成本条件下的内网穿透服务。
+
+## 前置需求
+
+本项目是基于以下条件，并由 AI 深度参与开发的，因此当您的已有条件与下述条件不符，可能产生一些意外的表现效果。
+
+- OpenWrt（x86_64）；
+- OpenWrt 下可见整个网络结构；
+- 一个处于公网可正常访问、绑定正常域名、有 CDN 保护的网站；
+- 所处网络环境不存在对称 NAT，UDP 打洞禁用等阻碍内网穿透等情况。
+
+> 由于本人精力限制，暂未维护用于内网穿透失败情况下的中转兜底方案。当您的网络环境无法成功穿透时，该项目对于您来说，几乎不可用。
+
+## 如何开始
+
+当您克隆本仓库至本地时，您在仓库根目录可看见 [README_Local.md](../README_Local.md)，该文档包含快速开始指南，您可据此部署。
+
+如果还想了解更多使用细节，可访问 [GitHub 仓库 Wiki](https://github.com/RenAhsAcme/SCWebVPN/wiki) 页面。
+
+## 如何贡献
+
+- 如果您提出的 Issue 属于 Bug/Security 类型，作者将会在精力允许范围内尽快完成修复；
+- 如果您提出的 Issue 属于 Feature 类型，作者可能需要很长一段时间才能实现；
+- 您可以按照社区通行规范发起 Pull Request 来请求修改本项目。
+
+## 许可证与其他合规说明
+
+除个别组件的单独许可证说明以外，该项目源代码采用 [GPL-3.0](../LICENSE) 授权。
+
+本项目含有使用 AGPL-3.0-only 授权的组件，因此当您部署相关服务时，请考虑相关条款限制。
+
+该项目的相关文字文档采用以下授权：
+
+<a href="../LICENSE-CC">
+  Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International
+</a>
+<img
+  src="https://mirrors.creativecommons.org/presskit/icons/cc.svg"
+  alt=""
+  style="max-width: 1em;max-height:1em;margin-left: .2em;"
+  width="19.197917938232422"
+  height="19.197917938232422"
+/>
+<img
+  src="https://mirrors.creativecommons.org/presskit/icons/by.svg"
+  alt=""
+  style="max-width: 1em;max-height:1em;margin-left: .2em;"
+  width="19.197917938232422"
+  height="19.197917938232422"
+/>
+<img
+  src="https://mirrors.creativecommons.org/presskit/icons/nc.svg"
+  alt=""
+  style="max-width: 1em;max-height:1em;margin-left: .2em;"
+  width="19.197917938232422"
+  height="19.197917938232422"
+>
+  <img
+    src="https://mirrors.creativecommons.org/presskit/icons/sa.svg"
+    alt=""
+    style="max-width: 1em;max-height:1em;margin-left: .2em;"
+    width="19.197917938232422"
+    height="19.197917938232422"
+  />
+
+在中国大陆，禁止部署该服务用于大规模公众服务，您必须采取适当手段限制该服务仅限您和您授权的人的小范围使用。
+
+禁止利用该项目从事违反任何违反所辖政府法律法规、所辖单位规定或干扰公共网络正常运行的活动。
+
+任何使用或改造本项目从事违法活动的行为，与项目原作者无关。
+
+## 支持作者
+
+点击仓库首页 Sponsor 按钮，跳转至打赏页面。
