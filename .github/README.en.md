@@ -47,35 +47,6 @@ The related text documentation for this project is licensed under the following 
 <a href="../LICENSE-CC">
   Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International
 </a>
-<img
-  src="https://mirrors.creativecommons.org/presskit/icons/cc.svg"
-  alt=""
-  style="max-width: 1em;max-height:1em;margin-left: .2em;"
-  width="19.197917938232422"
-  height="19.197917938232422"
-/>
-<img
-  src="https://mirrors.creativecommons.org/presskit/icons/by.svg"
-  alt=""
-  style="max-width: 1em;max-height:1em;margin-left: .2em;"
-  width="19.197917938232422"
-  height="19.197917938232422"
-/>
-<img
-  src="https://mirrors.creativecommons.org/presskit/icons/nc.svg"
-  alt=""
-  style="max-width: 1em;max-height:1em;margin-left: .2em;"
-  width="19.197917938232422"
-  height="19.197917938232422"
->
-  <img
-    src="https://mirrors.creativecommons.org/presskit/icons/sa.svg"
-    alt=""
-    style="max-width: 1em;max-height:1em;margin-left: .2em;"
-    width="19.197917938232422"
-    height="19.197917938232422"
-  />
-
 
 In Chinese Mainland, deploying this service for large-scale public use is prohibited. You must take appropriate measures to limit the service to a small group of people, including yourself and those you authorize.
 

@@ -42,34 +42,6 @@ SCWebVPN 来源于我在大学生活的需要。有时去上机房的实践课�
 <a href="../LICENSE-CC">
   Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International
 </a>
-<img
-  src="https://mirrors.creativecommons.org/presskit/icons/cc.svg"
-  alt=""
-  style="max-width: 1em;max-height:1em;margin-left: .2em;"
-  width="19.197917938232422"
-  height="19.197917938232422"
-/>
-<img
-  src="https://mirrors.creativecommons.org/presskit/icons/by.svg"
-  alt=""
-  style="max-width: 1em;max-height:1em;margin-left: .2em;"
-  width="19.197917938232422"
-  height="19.197917938232422"
-/>
-<img
-  src="https://mirrors.creativecommons.org/presskit/icons/nc.svg"
-  alt=""
-  style="max-width: 1em;max-height:1em;margin-left: .2em;"
-  width="19.197917938232422"
-  height="19.197917938232422"
->
-  <img
-    src="https://mirrors.creativecommons.org/presskit/icons/sa.svg"
-    alt=""
-    style="max-width: 1em;max-height:1em;margin-left: .2em;"
-    width="19.197917938232422"
-    height="19.197917938232422"
-  />
 
 在中国大陆，禁止部署该服务用于大规模公众服务，您必须采取适当手段限制该服务仅限您和您授权的人的小范围使用。
 
