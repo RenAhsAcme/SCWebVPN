@@ -4,6 +4,9 @@
 
 Quickly penetrate intranets anytime, anywhere using a web browser.
 
+> [!CAUTION]
+> This project is still in draft form. Some documentation may not accurately reflect reality, and it contains a significant amount of AIGC that has not been manually reviewed. Do not deploy this project in any production environment. For previewing and development, this project includes documentation for the AI Agent, allowing you to quickly get started using AI.
+
 ## Feature Introduction
 
 SCWebVPN originated from my needs during my university life. Sometimes when attending practical courses in the computer lab, the computers often had restore protection, and the tools on those computers obviously didn't meet my needs. Additionally, sometimes I deployed services on the intranet and wanted to access them remotely. Installing remote control software on-site wasn't convenient, so I conceived the idea of ​​creating a WebVPN for intranet penetration services with zero installation cost.
